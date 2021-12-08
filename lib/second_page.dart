@@ -19,19 +19,22 @@ class _SecondPageState extends State<SecondPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
-                child: Text("Number is ${num.num}"),
+                child: Text(
+                  "Number is ${num.num}",
+                  style: Theme.of(context).textTheme.headline4,
+                ),
               ),
               TextButton(
                 onPressed: () {
                   Provider.of<NumberModel>(context, listen: false).setNum(10);
                 },
-                child: const Text("Setta numero 10"),
+                child: const Text("Set number 10"),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text("Torna indietro"),
+                child: const Text("First page"),
               ),
             ],
           );
