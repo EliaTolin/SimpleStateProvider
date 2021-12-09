@@ -1,16 +1,7 @@
-# simple_state_provider
+# Simple state provider
 
-A new Flutter project.
+#####  The use of the provider has been implemented in the initial flutter example.
 
-## Getting Started
+A second page has also been added to check the providers on the second page.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![](https://italiancoders.it/wp-content/uploads/2019/08/flutter-first-app-768x791.png)
