@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_state_provider/ad_state.dart';
 import 'package:simple_state_provider/number_model.dart';
 import 'package:simple_state_provider/second_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  final initFuture = MobileAds.instance.initialize();
+  final adState = AdState(initFuture);
   runApp(
     MultiProvider(
       providers: [
+        Provider.value(value: adState),
         ChangeNotifierProvider(create: (context) => NumberModel()),
         // Provider(create: (context)=>)
       ],
@@ -41,8 +47,42 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  BannerAd? banner;
+  AdState? adStateBanner;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    adStateBanner = Provider.of<AdState>(context);
+    adStateBanner!.initialization.then(
+      (status) {
+        setState(() {
+          banner = BannerAd(
+            adUnitId: adStateBanner!.bannerAdUnitId,
+            size: AdSize.banner,
+            request: const AdRequest(),
+            listener: adStateBanner!.adListener,
+          )..load();
+        });
+      },
+    );
+  }
+
   void _incrementCounter(BuildContext context) {
     Provider.of<NumberModel>(context, listen: false).add();
+    if (Provider.of<NumberModel>(context, listen: false).num == 3) {
+      showInterstial();
+    }
+    if (Provider.of<NumberModel>(context, listen: false).num == 9) {
+      showInterstial();
+    }
+    if (Provider.of<NumberModel>(context, listen: false).num == 6) {
+      showInterstial();
+    }
+  }
+
+  void showInterstial() async {
+    await adStateBanner!.createInterstialAd();
+    adStateBanner!.showInterad();
   }
 
   @override
@@ -55,12 +95,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -82,11 +116,18 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SecondPage()),
+                  MaterialPageRoute(builder: (context) => const SecondPage()),
                 );
               },
               child: const Text("Second Page"),
             ),
+            if (banner == null)
+              const SizedBox(height: 50)
+            else
+              Container(
+                height: 50,
+                child: AdWidget(ad: banner!),
+              ),
           ],
         ),
       ),
