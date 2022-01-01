@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_state_provider/ad_state.dart';
+import 'package:simple_state_provider/ads/ad_banner_helper.dart';
 import 'package:simple_state_provider/number_model.dart';
-import 'package:simple_state_provider/second_page.dart';
 
 import 'homepage.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final initFuture = MobileAds.instance.initialize();
-  final adState = AdState(initFuture);
+  MobileAds.instance.initialize();
   runApp(
     MultiProvider(
       providers: [
-        Provider.value(value: adState),
+        ChangeNotifierProvider(create: (context) => AdBannerHelper()),
         ChangeNotifierProvider(create: (context) => NumberModel()),
-        // Provider(create: (context)=>)
       ],
       child: const SimpleProviderApp(),
     ),

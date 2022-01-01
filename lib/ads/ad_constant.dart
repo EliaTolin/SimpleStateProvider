@@ -1,6 +1,6 @@
 import 'dart:io';
 
-class AdHelper {
+class AdConstant {
   static String get bannerAdUnitId {
     if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544/6300978111';

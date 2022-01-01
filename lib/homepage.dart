@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_state_provider/ads/ad_banner_helper.dart';
+import 'package:simple_state_provider/ads/ad_interstitial_helper.dart';
 import 'package:simple_state_provider/second_page.dart';
-
-import 'ads/ad_helper.dart';
 import 'number_model.dart';
 
 const int maxFailedLoadAttemps = 3;
@@ -18,80 +18,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late BannerAd _bottomBannerAd;
-
-  int _interstialLoadAttempts = 0;
-  InterstitialAd? _interstitialAd;
-  bool _isBottomBannerAdLoaded = false;
-
-  void _createBottomBannerAd() {
-    _bottomBannerAd = BannerAd(
-      adUnitId: AdHelper.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          setState(() {
-            _isBottomBannerAdLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        },
-      ),
-    );
-    _bottomBannerAd.load();
-  }
-
-  void _createInterstialAd() {
-    InterstitialAd.load(
-      adUnitId: AdHelper.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (InterstitialAd ad) {
-          _interstialLoadAttempts = 0;
-          _interstitialAd = ad;
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          _interstitialAd = null;
-          _interstialLoadAttempts += 1;
-          if (_interstialLoadAttempts >= maxFailedLoadAttemps) {
-            _createInterstialAd();
-          }
-        },
-      ),
-    );
-  }
-
-  void _showInterstialAds() {
-    if (_interstitialAd != null) {
-      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (InterstitialAd ad) {
-          ad.dispose();
-          _createInterstialAd();
-        },
-        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-          ad.dispose();
-          _createInterstialAd();
-        },
-      );
-      _interstitialAd!.show();
-    }
-  }
+  AdInterstitialHelper adInterstitialHelper = AdInterstitialHelper();
 
   void _incrementCounter(BuildContext context) {
     Provider.of<NumberModel>(context, listen: false).add();
     int num = Provider.of<NumberModel>(context, listen: false).num;
     if (num == 3 || num == 6 || num == 9) {
-      _showInterstialAds();
+      adInterstitialHelper.showInterstialAds();
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _createBottomBannerAd();
-    _createInterstialAd();
+    Provider.of<AdBannerHelper>(context, listen: false).createBannerAd();
+    adInterstitialHelper.createInterstialAd();
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       Provider.of<NumberModel>(context, listen: false).initizialize();
     });
@@ -100,8 +41,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     super.dispose();
-    _bottomBannerAd.dispose();
-    _interstitialAd?.dispose();
+    Provider.of<AdBannerHelper>(context, listen: false).adDispose();
   }
 
   @override
@@ -110,14 +50,19 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      bottomNavigationBar: _isBottomBannerAdLoaded
-          ? Container(
-              height: _bottomBannerAd.size.height.toDouble(),
-              width: _bottomBannerAd.size.width.toDouble(),
+      bottomNavigationBar: Consumer<AdBannerHelper>(
+          builder: (context, AdBannerHelper bannerHelper, child) {
+        if (bannerHelper.isBottomBannerAdLoaded) {
+          AdSize adSize = bannerHelper.getSizeBanner();
+          return Container(
+              height: adSize.height.toDouble(),
+              width: adSize.width.toDouble(),
               child: AdWidget(
-                ad: _bottomBannerAd,
-              ))
-          : null,
+                ad: bannerHelper.getBanner(),
+              ));
+        }
+        return Container();
+      }),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -125,12 +70,16 @@ class _HomePageState extends State<HomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
-            Consumer<NumberModel>(builder: (context, NumberModel num, child) {
-              return Text(
-                Provider.of<NumberModel>(context, listen: false).num.toString(),
-                style: Theme.of(context).textTheme.headline4,
-              );
-            }),
+            Consumer<NumberModel>(
+              builder: (context, NumberModel num, child) {
+                return Text(
+                  Provider.of<NumberModel>(context, listen: false)
+                      .num
+                      .toString(),
+                  style: Theme.of(context).textTheme.headline4,
+                );
+              },
+            ),
             TextButton(
               onPressed: () {
                 Navigator.push(
