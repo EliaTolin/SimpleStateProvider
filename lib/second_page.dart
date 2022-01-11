@@ -14,19 +14,19 @@ class _SecondPageState extends State<SecondPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Consumer<NumberModel>(
-        builder: (context, num, child) {
+        builder: (context, numberModel, child) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
                 child: Text(
-                  "Number is ${num.num}",
+                  "Number is ${numberModel.num}",
                   style: Theme.of(context).textTheme.headline4,
                 ),
               ),
               TextButton(
                 onPressed: () {
-                  Provider.of<NumberModel>(context, listen: false).setNum(10);
+                  numberModel.setNum(10);
                 },
                 child: const Text("Set number 10"),
               ),

@@ -72,9 +72,10 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
-            Consumer<NumberModel>(builder: (context, num, child) {
+            Consumer<NumberModel>(
+                builder: (context, NumberModel numberModel, child) {
               return Text(
-                Provider.of<NumberModel>(context, listen: false).num.toString(),
+                numberModel.num.toString(),
                 style: Theme.of(context).textTheme.headline4,
               );
             }),
@@ -82,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SecondPage()),
+                  MaterialPageRoute(builder: (context) => const SecondPage()),
                 );
               },
               child: const Text("Second Page"),
